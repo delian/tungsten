@@ -1,0 +1,61 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "centos/7"
+
+  config.vm.define :k1 do |k1|
+  end
+
+  config.vm.provider :libvirt do |lv|
+      lv.uri = 'qemu+unix:///system'
+      lv.cpus = 4
+      lv.memory = 8192
+      lv.boot 'hd'
+      lv.machine_virtual_size = 51000
+      lv.management_network_name = "vag-mgmt01"
+      lv.management_network_autostart = "true"
+      lv.management_network_address = "192.168.120.0/24"
+      lv.management_network_autostart = "true"
+  end
+
+  #config.vm.network :public_network, :ip => "192.168.120.123"
+
+  config.vm.provision "shell", inline: <<-SHELL
+	yum clean all
+	yum update -y
+	yum install -y tmux joe tcpdump gcc python2-pip epel-release
+	yum install -y joe net-tools lsof ntp vim git ansible python-devel
+	systemctl enable ntpd
+	systemctl restart ntpd
+	sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+	systemctl restart sshd
+	usermod root -p '\$1\$lYJ/EaMg\$KokgHCs2eqrEZ7Nima.Vs1'
+	su - vagrant -c 'ssh-keygen -N "" -f ~vagrant/.ssh/id_rsa'
+	cat ~vagrant/.ssh/id_rsa.pub >> ~vagrant/.ssh/authorized_keys
+	cat > ~vagrant/.ssh/config << EOF
+TCPKeepAlive yes
+ServerAliveInterval 30
+StrictHostKeyChecking no
+EOF
+	chown vagrant.vagrant ~vagrant/.ssh/config
+	fdisk /dev/vda << EOF
+p
+d
+n
+p
+1
+
++50G
+p
+a
+p
+w
+EOF
+	partprobe
+	xfs_growfs /dev/vda1
+  SHELL
+
+#  config.vm.provision "shell", reboot: true
+
+end

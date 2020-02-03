@@ -7,7 +7,7 @@ init:
 	@echo "Init..."
 	@make up
 	vagrant ssh-config > .ssh_config
-	[ -d contrail-ansible-deployer ] || git clone http://github.com/Juniper/contrail-ansible-deployer
+	[ -d contrail-ansible-deployer ] || git clone -b R5.0 http://github.com/Juniper/contrail-ansible-deployer
 
 up:
 	@echo "Vagrant up"

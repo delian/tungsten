@@ -55,7 +55,7 @@ EOF
 	partprobe
 	xfs_growfs /dev/vda1
 	echo "Clone the git repository"
-	git clone http://github.com/Juniper/contrail-ansible-deployer
+	git clone -b R5.0 http://github.com/Juniper/contrail-ansible-deployer
   SHELL
 
 #  config.vm.provision "shell", reboot: true

@@ -15,3 +15,8 @@ up:
 
 destroy:
 	vagrant destroy --force
+
+
+clean:
+	@make destroy
+	rm -rf contrail-ansible-deployer .ssh_config

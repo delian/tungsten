@@ -71,6 +71,8 @@ name = Docker Repository
 EOF
 
 	yum install -y docker-ce-selinux-17.03.3.ce-1.el7.noarch
+	systemctl enable docker.service
+	systemctl start docker.service
 
 	# Install Kubernetes
 	cat <<EOF > /etc/yum.repos.d/kubernetes.repo

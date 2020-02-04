@@ -1,0 +1,4 @@
+[submodule "e1/contrail"]
+	path = e1/contrail
+	url = http://github.com/Juniper/contrail-ansible-deployer
+	branch = R5.0

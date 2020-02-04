@@ -19,4 +19,4 @@ destroy:
 
 clean:
 	@make destroy
-	rm -rf contrail-ansible-deployer .ssh_config
+	rm -rf contrail-ansible-deployer .ssh_config *~

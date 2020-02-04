@@ -12,7 +12,7 @@ Vagrant.configure("2") do |config|
       lv.cpus = 4
       lv.memory = 8192
       lv.boot 'hd'
-      lv.machine_virtual_size = 51000
+      lv.machine_virtual_size = 100100
       lv.management_network_name = "vag-mgmt01"
       lv.management_network_autostart = "true"
       lv.management_network_address = "192.168.120.0/24"
@@ -46,7 +46,7 @@ n
 p
 1
 
-+50G
++100G
 p
 a
 p
@@ -56,6 +56,7 @@ EOF
 	xfs_growfs /dev/vda1
 	echo "Clone the git repository"
 	git clone -b R5.0 http://github.com/Juniper/contrail-ansible-deployer
+	chown vagrant.vagrant -R contrail-ansible-deployer
   SHELL
 
 #  config.vm.provision "shell", reboot: true

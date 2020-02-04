@@ -7,6 +7,8 @@ Vagrant.configure("2") do |config|
   config.vm.define :k1 do |k1|
   end
 
+  config.vm.hostname = "tgf"
+
   config.vm.provider :libvirt do |lv|
       lv.uri = 'qemu+unix:///system'
       lv.cpus = 4
@@ -57,6 +59,53 @@ EOF
 	echo "Clone the git repository"
 	git clone -b R5.0 http://github.com/Juniper/contrail-ansible-deployer
 	chown vagrant.vagrant -R contrail-ansible-deployer
+	pip install --upgrade pip zipp
+
+	# Install Docker
+	cat > /etc/yum.repos.d/dockerrepo.repo << EOF
+[dockerrepo]
+baseurl = https://download.docker.com/linux/centos/7/$basearch/stable
+gpgcheck = 1
+gpgkey = https://download.docker.com/linux/centos/gpg
+name = Docker Repository
+EOF
+
+	yum install -y docker-ce-17.03.0.ce-1.el7.centos.x86_64
+
+	# Install Kubernetes
+	cat <<EOF > /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+EOF
+
+	yum install -y kubelet-1.9.2-0.x86_64 kubeadm-1.9.2-0.x86_64 kubectl-1.9.2-0.x86_64
+	systemctl enable kubelet
+	systemctl start kubelet
+
+	# Firewall Daemon is not installed anyway, so we don't need this
+	#firewall-cmd --permanent --add-port=6443/tcp
+	#firewall-cmd --permanent --add-port=2379-2380/tcp
+	#firewall-cmd --permanent --add-port=10250/tcp
+	#firewall-cmd --permanent --add-port=10251/tcp
+	#firewall-cmd --permanent --add-port=10252/tcp
+	#firewall-cmd --permanent --add-port=10255/tcp
+	#firewall-cmd –-reload
+
+	cat > /etc/sysctl.d/10-contrail-node << EOF
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+EOF
+	sysctl --system
+	setenforce 0
+	sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+	sed -i '/swap/d' /etc/fstab
+	swapoff -a
+
   SHELL
 
 #  config.vm.provision "shell", reboot: true

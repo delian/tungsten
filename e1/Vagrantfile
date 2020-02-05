@@ -70,7 +70,7 @@ gpgkey = https://download.docker.com/linux/centos/gpg
 name = Docker Repository
 EOF
 
-	yum install -y docker-ce-selinux-17.03.3.ce-1.el7.noarch
+	yum install -y --setopt=obsoletes=0 docker-ce-17.03.1.ce-1.el7.centos docker-ce-selinux-17.03.3.ce-1.el7
 	systemctl enable docker.service
 	systemctl start docker.service
 

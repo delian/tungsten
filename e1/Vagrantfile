@@ -56,9 +56,11 @@ w
 EOF
 	partprobe
 	xfs_growfs /dev/vda1
+
 	echo "Clone the git repository"
 	git clone -b R5.0 http://github.com/Juniper/contrail-ansible-deployer
 	chown vagrant.vagrant -R contrail-ansible-deployer
+
 	pip install --upgrade pip zipp
 
 	# Install Docker
@@ -114,10 +116,34 @@ EOF
 	#firewall-cmd --permanent --add-port=10255/tcp
 	#firewall-cmd –-reload
 
-	cat > /etc/sysctl.d/10-contrail-node << EOF
+	cat > /etc/sysctl.d/10-contrail-node.conf << EOF
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 EOF
+
+# Lets generate base instances.yaml file
+	mv contrail-ansible-deployer/config/instances.yaml contrail-ansible-deployer/config/instances.yaml.org
+	cat > contrail-ansible-deployer/config/instances.yaml <<EOF
+provider_config:
+  bms:
+    ssh_pwd: vagrant
+    ssh_user: vagrant
+    ssh_public_key: /home/vagrant/.ssh/id_rsa.pub
+    ssh_private_key: /home/vagrant/.ssh/id_rsa
+    ntpserver: 64.99.80.121
+    domainsuffix: local
+instances:
+  bms1:
+    provider: bms
+    ip: X.X.X.X
+global_configuration:
+  CONTAINER_REGISTRY: opencontrailnightly
+  REGISTRY_PRIVATE_INSECURE: True
+contrail_configuration:
+  CONTRAIL_VERSION: ocata-5.0-20180219195722
+  UPGRADE_KERNEL: true
+EOF
+	chown vagrant.vagrant contrail-ansible-deployer/config/instances.yaml
 
   SHELL
 

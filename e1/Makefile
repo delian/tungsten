@@ -16,6 +16,9 @@ update:
 up:
 	@echo "Vagrant up"
 	@vagrant up
+	@echo "Restart the vagrant"
+	@vagrant halt
+	@vagrant up
 
 destroy:
 	vagrant destroy --force

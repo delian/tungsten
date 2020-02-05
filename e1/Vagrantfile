@@ -101,7 +101,7 @@ EOF
 	#firewall-cmd --permanent --add-port=10255/tcp
 	#firewall-cmd –-reload
 
-	cat > /etc/sysctl.d/10-contrail-node << EOF
+	cat > /etc/sysctl.d/10-contrail-node.conf << EOF
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 EOF

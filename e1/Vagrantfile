@@ -85,10 +85,26 @@ repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 EOF
 
+	setenforce 0
+	sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+	swapoff -a
+	#echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
+	cat > /etc/sysctl.conf << EOF
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+EOF
+        sysctl --system
 	yum install -y kubelet-1.9.2-0.x86_64
-	yum install -y kubeadm-1.9.2-0.x86_64 kubectl-1.9.2-0.x86_64
+        yum install -y kubeadm-1.9.2-0.x86_64 kubectl-1.9.2-0.x86_64	
+	sed -i 's/cgroup-driver=systemd/cgroup-driver=cgroupfs/g' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+	systemctl daemon-reload
 	systemctl enable kubelet
 	systemctl start kubelet
+
+	kubeadm init
+	mkdir -p $HOME/.kube
+	sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+	sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 	# Firewall Daemon is not installed anyway, so we don't need this
 	#firewall-cmd --permanent --add-port=6443/tcp
@@ -103,11 +119,6 @@ EOF
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 EOF
-	sysctl --system
-	setenforce 0
-	sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
-	sed -i '/swap/d' /etc/fstab
-	swapoff -a
 
   SHELL
 

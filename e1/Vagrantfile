@@ -133,6 +133,7 @@ contrail_configuration:
   CONTRAIL_VERSION: ocata-5.0-20180219195722
   UPGRADE_KERNEL: true
 EOF
+	chown vagrant.vagrant contrail-ansible-deployer/config/instances.yaml
 
   SHELL
 

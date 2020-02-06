@@ -90,6 +90,8 @@ EOF
 	setenforce 0
 	sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
 	swapoff -a
+	cp /etc/fstab /etc/fstab.org
+	grep -v swap /etc/fstab.org > /etc/fstab
 	cat > /etc/sysctl.d/10-contrail-node.conf << EOF
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1

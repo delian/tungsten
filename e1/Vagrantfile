@@ -106,8 +106,12 @@ EOF
 
 	kubeadm init
 	mkdir -p $HOME/.kube
-	sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-	sudo chown $(id -u):$(id -g) $HOME/.kube/config
+	cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+	chown $(id -u):$(id -g) $HOME/.kube/config
+
+	# Do it for the vagrant user too
+	cp -a $HOME/.kube ~vagrant/
+	chown vagrant.vagrant -R ~vagrant/.kube
 
 	# Firewall Daemon is not installed anyway, so we don't need this
 	#firewall-cmd --permanent --add-port=6443/tcp

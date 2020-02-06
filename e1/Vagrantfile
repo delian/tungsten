@@ -112,6 +112,9 @@ EOF
 	# Do it for the vagrant user too
 	cp -a $HOME/.kube ~vagrant/
 	chown vagrant.vagrant -R ~vagrant/.kube
+	
+	curl https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml > flannel.yml
+        kubectl apply -f flannel.yml
 
 	# Firewall Daemon is not installed anyway, so we don't need this
 	#firewall-cmd --permanent --add-port=6443/tcp

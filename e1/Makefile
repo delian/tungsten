@@ -1,6 +1,11 @@
 
 help:
-	@echo "Make"
+	@echo "Make usage"
+	@echo "  make init     - use after git clone to initialize the environment, do vagrant up and clone the git submodules"
+	@echo "  make update   - use it to refresh the git submodules"
+	@echo "  make up       - equivalent to vagrant up + vagrant halt and up again, to reboot the machine after re-provision, to enforce the new kernel"
+	@echo "  make destroy  - destroys the vagrant vm"
+	@echo "  make clean    - removes the uncommitted changes (git reset) and destroys the vagrant vm"
 
 
 init:

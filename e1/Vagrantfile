@@ -104,6 +104,9 @@ EOF
 	systemctl enable kubelet
 	systemctl start kubelet
 
+	set -v
+	set -x
+
 	kubeadm init --pod-network-cidr=10.244.0.0/16
 	mkdir -p $HOME/.kube
 	cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
@@ -116,13 +119,14 @@ EOF
 #	kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/k8s-manifests/kube-flannel-legacy.yml
         master_cluster_IP=$(kubectl cluster-info | grep master | cut -f2 -d ":" | cut -d '/' -f3)
 
-	# Install 
+	# Install
 	echo "Master Cluster IP is $master_cluster_IP"
-	K8S_MASTER_IP="$master_cluster_IP"
-	CONTRAIL_REPO="docker.io\/opencontrailnightly"
+	K8S_MASTER_IP="\$master_cluster_IP"
+	CONTRAIL_REPO="docker.io\\\/opencontrailnightly"
 	CONTRAIL_RELEASE="latest"
 	mkdir -pm 777 /var/lib/contrail/kafka-logs
-	curl https://raw.githubusercontent.com/Juniper/contrail-kubernetes-docs/master/install/kubernetes/templates/contrail-single-step-cni-install-centos.yaml | sed -e "s/{{ K8S_MASTER_IP }}/\$K8S_MASTER_IP/g; s/{{ CONTRAIL_REPO }}/\$CONTRAIL_REPO/g; s/{{ CONTRAIL_RELEASE }}/\$CONTRAIL_RELEASE/g" | kubectl apply -f -
+	curl https://raw.githubusercontent.com/Juniper/contrail-kubernetes-docs/master/install/kubernetes/templates/contrail-single-step-cni-install-centos.yaml > contrail-single-step-cni-install-centos.yaml
+        sed "s/{{ K8S_MASTER_IP }}/\$K8S_MASTER_IP/g; s/{{ CONTRAIL_REPO }}/\$CONTRAIL_REPO/g; s/{{ CONTRAIL_RELEASE }}/\$CONTRAIL_RELEASE/g" contrail-single-step-cni-install-centos.yaml | kubectl apply -f -
 
 	# Firewall Daemon is not installed anyway, so we don't need this
 	#firewall-cmd --permanent --add-port=6443/tcp

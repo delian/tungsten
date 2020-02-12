@@ -5,9 +5,16 @@ Vagrant.configure("2") do |config|
   config.vm.box = "centos/7"
 
   config.vm.define :k2 do |k2|
+	config.vm.hostname = "tgf-controller"
+	config.vm.network :private_network, :ip => "192.168.133.10"
   end
 
-  config.vm.hostname = "tgf-vrouter"
+  config.vm.define :k3 do |k3|
+	config.vm.hostname = "tgf-vrouter"
+	config.vm.network :private_network, :ip => "192.168.133.11"
+  end
+
+#  config.vm.hostname = "tgf-vrouter"
 
   config.vm.provider :libvirt do |lv|
       lv.uri = 'qemu+unix:///system'
@@ -98,7 +105,7 @@ net.bridge.bridge-nf-call-iptables = 1
 EOF
         sysctl --system
 	yum install -y kubelet-1.9.2-0.x86_64
-       yum install -y kubeadm-1.9.2-0.x86_64 kubectl-1.9.2-0.x86_64	
+        yum install -y kubeadm-1.9.2-0.x86_64 kubectl-1.9.2-0.x86_64	
 	sed -i 's/cgroup-driver=systemd/cgroup-driver=cgroupfs/g' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 	systemctl daemon-reload
 	systemctl enable kubelet
@@ -107,16 +114,16 @@ EOF
 #	set -v
 #	set -x
 
-	kubeadm init --pod-network-cidr=10.244.0.0/16
-	mkdir -p $HOME/.kube
-	cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-	chown $(id -u):$(id -g) $HOME/.kube/config
+#	kubeadm init --pod-network-cidr=10.244.0.0/16
+#	mkdir -p $HOME/.kube
+#	cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+#	chown $(id -u):$(id -g) $HOME/.kube/config
 
 	# Do it for the vagrant user too
-	cp -a $HOME/.kube ~vagrant/
-	chown vagrant.vagrant -R ~vagrant/.kube
-	kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-#	kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/k8s-manifests/kube-flannel-legacy.yml
+#	cp -a $HOME/.kube ~vagrant/
+#	chown vagrant.vagrant -R ~vagrant/.kube
+#	kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+##	kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/k8s-manifests/kube-flannel-legacy.yml
 #        master_cluster_IP=$(kubectl cluster-info | grep master | cut -f2 -d ":" | cut -d '/' -f3)
 
 	# Install
@@ -151,7 +158,7 @@ provider_config:
 instances:
   controller:
     provider: bms
-    ip: "\$master_cluster_IP"
+    ip: # "\$master_cluster_IP"
     roles:            # Optional.  If roles is not defined, all below roles will be created
        config_database:         # Optional.
        config:                  # Optional.
@@ -161,21 +168,26 @@ instances:
        webui:                   # Optional.
        k8s_master:              # Optional.
        kubemanager:             # Optional.
-  branch:
-    provider: bms
-    ip: "\$master_cluster_IP"
-    roles:
-       vrouter:
-       k8s_node:
+#  branch:
+#    provider: bms
+#    ip: "\$master_cluster_IP"
+#    roles:
+#       vrouter:
+#       k8s_node:
 global_configuration:
   CONTAINER_REGISTRY: opencontrailnightly
   REGISTRY_PRIVATE_INSECURE: True
 contrail_configuration:
-  CONTRAIL_VERSION: lastest
+  CONTRAIL_VERSION: latest
   UPGRADE_KERNEL: true
   KUBERNETES_CLUSTER_PROJECT: {}
 EOF
 	chown vagrant.vagrant contrail-ansible-deployer/config/instances.yaml
+#        ansible-playbook -e orchestrator=kubernetes -i inventory/ contrail-ansible-deployer/playbooks/configure_instances.yml
+# 	ansible-playbook -e orchestrator=kubernetes -i inventory/ contrail-ansible-deployer/playbooks/install_k8s.yml
+# 	ansible-playbook -e orchestrator=kubernetes -i inventory/ contrail-ansible-deployer/playbooks/install_contrail.yml
+
+
 
   SHELL
 

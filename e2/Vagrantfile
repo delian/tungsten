@@ -4,17 +4,15 @@
 Vagrant.configure("2") do |config|
   config.vm.box = "centos/7"
 
-  config.vm.define :k2 do |k2|
+  config.vm.define :controller do |config|
 	config.vm.hostname = "tgf-controller"
-	config.vm.network :private_network, :ip => "192.168.133.10"
+	config.vm.network "private_network", ip: "192.168.133.10"
   end
 
-  config.vm.define :k3 do |k3|
+  config.vm.define :branch do |config|
 	config.vm.hostname = "tgf-vrouter"
-	config.vm.network :private_network, :ip => "192.168.133.11"
+	config.vm.network "private_network", ip: "192.168.133.11"
   end
-
-#  config.vm.hostname = "tgf-vrouter"
 
   config.vm.provider :libvirt do |lv|
       lv.uri = 'qemu+unix:///system'
@@ -27,8 +25,6 @@ Vagrant.configure("2") do |config|
       lv.management_network_address = "192.168.120.0/24"
       lv.management_network_autostart = "true"
   end
-
-  #config.vm.network :public_network, :ip => "192.168.120.123"
 
   config.vm.provision "shell", inline: <<-SHELL
 	yum clean all

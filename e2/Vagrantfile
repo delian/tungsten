@@ -98,14 +98,14 @@ net.bridge.bridge-nf-call-iptables = 1
 EOF
         sysctl --system
 	yum install -y kubelet-1.9.2-0.x86_64
-        yum install -y kubeadm-1.9.2-0.x86_64 kubectl-1.9.2-0.x86_64	
+       yum install -y kubeadm-1.9.2-0.x86_64 kubectl-1.9.2-0.x86_64	
 	sed -i 's/cgroup-driver=systemd/cgroup-driver=cgroupfs/g' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 	systemctl daemon-reload
 	systemctl enable kubelet
 	systemctl start kubelet
 
-	set -v
-	set -x
+#	set -v
+#	set -x
 
 	kubeadm init --pod-network-cidr=10.244.0.0/16
 	mkdir -p $HOME/.kube
@@ -117,7 +117,7 @@ EOF
 	chown vagrant.vagrant -R ~vagrant/.kube
 	kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 #	kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/k8s-manifests/kube-flannel-legacy.yml
-        master_cluster_IP=$(kubectl cluster-info | grep master | cut -f2 -d ":" | cut -d '/' -f3)
+#        master_cluster_IP=$(kubectl cluster-info | grep master | cut -f2 -d ":" | cut -d '/' -f3)
 
 	# Install
 #	echo "Master Cluster IP is $master_cluster_IP"
@@ -149,15 +149,31 @@ provider_config:
     ntpserver: 64.99.80.121
     domainsuffix: local
 instances:
-  bms1:
+  controller:
     provider: bms
-    ip: X.X.X.X
+    ip: "\$master_cluster_IP"
+    roles:            # Optional.  If roles is not defined, all below roles will be created
+       config_database:         # Optional.
+       config:                  # Optional.
+       control:                 # Optional.
+       analytics_database:      # Optional.
+       analytics:               # Optional.
+       webui:                   # Optional.
+       k8s_master:              # Optional.
+       kubemanager:             # Optional.
+  branch:
+    provider: bms
+    ip: "\$master_cluster_IP"
+    roles:
+       vrouter:
+       k8s_node:
 global_configuration:
   CONTAINER_REGISTRY: opencontrailnightly
   REGISTRY_PRIVATE_INSECURE: True
 contrail_configuration:
-  CONTRAIL_VERSION: ocata-5.0-20180219195722
+  CONTRAIL_VERSION: lastest
   UPGRADE_KERNEL: true
+  KUBERNETES_CLUSTER_PROJECT: {}
 EOF
 	chown vagrant.vagrant contrail-ansible-deployer/config/instances.yaml
 

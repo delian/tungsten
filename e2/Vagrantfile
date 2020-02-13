@@ -12,11 +12,21 @@ Vagrant.configure("2") do |config|
       		lv.cpus = 4
       		lv.memory = 12000
   	end
+	config.vm.provision "file", source: "instances.yaml", destination: "instances.yaml"
   end
 
-  config.vm.define :branch do |config|
-	config.vm.hostname = "tgf-vrouter"
+  config.vm.define :branch1 do |config|
+	config.vm.hostname = "tgf-branch1"
 	config.vm.network "private_network", ip: "192.168.133.11"
+	config.vm.provider :libvirt do |lv|
+		lv.cpus = 2
+      		lv.memory = 2100
+  	end
+  end
+
+  config.vm.define :branch2 do |config|
+	config.vm.hostname = "tgf-branch2"
+	config.vm.network "private_network", ip: "192.168.133.12"
 	config.vm.provider :libvirt do |lv|
 		lv.cpus = 2
       		lv.memory = 2100
@@ -150,47 +160,13 @@ EOF
 
 # Lets generate base instances.yaml file
 	mv contrail-ansible-deployer/config/instances.yaml contrail-ansible-deployer/config/instances.yaml.org
-	cat > contrail-ansible-deployer/config/instances.yaml <<EOF
-provider_config:
-  bms:
-    ssh_pwd: vagrant
-    ssh_user: vagrant
-    ssh_public_key: /home/vagrant/.ssh/id_rsa.pub
-    ssh_private_key: /home/vagrant/.ssh/id_rsa
-    ntpserver: 64.99.80.121
-    domainsuffix: local
-instances:
-  controller:
-    provider: bms
-    ip: # "\$master_cluster_IP"
-    roles:            # Optional.  If roles is not defined, all below roles will be created
-       config_database:         # Optional.
-       config:                  # Optional.
-       control:                 # Optional.
-       analytics_database:      # Optional.
-       analytics:               # Optional.
-       webui:                   # Optional.
-       k8s_master:              # Optional.
-       kubemanager:             # Optional.
-#  branch:
-#    provider: bms
-#    ip: "\$master_cluster_IP"
-#    roles:
-#       vrouter:
-#       k8s_node:
-global_configuration:
-  CONTAINER_REGISTRY: opencontrailnightly
-  REGISTRY_PRIVATE_INSECURE: True
-contrail_configuration:
-  CONTRAIL_VERSION: latest
-  UPGRADE_KERNEL: true
-  KUBERNETES_CLUSTER_PROJECT: {}
-EOF
+	[ -f instances.yaml ] && mv -v instances.yaml contrail-ansible-deployer/config/instances.yaml
 	chown vagrant.vagrant contrail-ansible-deployer/config/instances.yaml
-#        ansible-playbook -e orchestrator=kubernetes -i inventory/ contrail-ansible-deployer/playbooks/configure_instances.yml
+
+#	cd contrail-ansible-deployer
+#       ansible-playbook -e orchestrator=kubernetes -i inventory/ contrail-ansible-deployer/playbooks/configure_instances.yml
 # 	ansible-playbook -e orchestrator=kubernetes -i inventory/ contrail-ansible-deployer/playbooks/install_k8s.yml
 # 	ansible-playbook -e orchestrator=kubernetes -i inventory/ contrail-ansible-deployer/playbooks/install_contrail.yml
-
 
 
   SHELL

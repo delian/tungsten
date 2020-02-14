@@ -12,7 +12,7 @@ Vagrant.configure("2") do |config|
       		lv.cpus = 4
       		lv.memory = 12000
   	end
-	config.vm.provision "file", source: "instances.yaml", destination: "instances.yaml"
+	config.vm.provision "file", source: "instances.yaml", destination: "~/vagrant/instances.yaml"
   end
 
   config.vm.define :branch1 do |config|
@@ -118,12 +118,12 @@ net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 EOF
         sysctl --system
-	yum install -y kubelet-1.9.2-0.x86_64
-        yum install -y kubeadm-1.9.2-0.x86_64 kubectl-1.9.2-0.x86_64	
-	sed -i 's/cgroup-driver=systemd/cgroup-driver=cgroupfs/g' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-	systemctl daemon-reload
-	systemctl enable kubelet
-	systemctl start kubelet
+#	yum install -y kubelet-1.9.2-0.x86_64
+#        yum install -y kubeadm-1.9.2-0.x86_64 kubectl-1.9.2-0.x86_64	
+#	sed -i 's/cgroup-driver=systemd/cgroup-driver=cgroupfs/g' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+#	systemctl daemon-reload
+#	systemctl enable kubelet
+#	systemctl start kubelet
 
 #	set -v
 #	set -x
@@ -160,7 +160,8 @@ EOF
 
 # Lets generate base instances.yaml file
 	mv contrail-ansible-deployer/config/instances.yaml contrail-ansible-deployer/config/instances.yaml.org
-	[ -f instances.yaml ] && mv -v instances.yaml contrail-ansible-deployer/config/instances.yaml
+	#[ -f ~/vagrant/instances.yaml ] &&
+	mv -v /vagrant/instances.yaml /home/vagrant/contrail-ansible-deployer/config/instances.yaml
 	chown vagrant.vagrant contrail-ansible-deployer/config/instances.yaml
 
 #	cd contrail-ansible-deployer

@@ -10,7 +10,7 @@ Vagrant.configure("2") do |config|
 	config.vm.network "forwarded_port", guest_ip: "192.168.133.10", guest: 8143, host: 8143, protocol: "tcp"
 	config.vm.provider :libvirt do |lv|
       		lv.cpus = 4
-      		lv.memory = 24000
+      		lv.memory = 12000
   	end
 	config.vm.provision "file", source: "instances.yaml", destination: "~/vagrant/instances.yaml"
   end

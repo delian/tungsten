@@ -31,5 +31,5 @@ destroy:
 
 clean:
 	@make destroy
-	@#rm -rf contrail-ansible-deployer .ssh_config *~ contrail
+	@rm -rf contrail-ansible-deployer .ssh_config *~ contrail .vagrant
 	git reset HEAD

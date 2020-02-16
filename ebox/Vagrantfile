@@ -69,7 +69,7 @@ EOF
 	mkdir -p /home/vagrant/.ssh
 	chmod 0700 /home/vagrant/.ssh
 	# The insecure vagrant key to enforce Vagrant to change it on boot
-	wget --no-check-certificate https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub -O /home/vagrant/.ssh/authorized_keys
+	curl -k https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub > /home/vagrant/.ssh/authorized_keys
 	chmod 0600 /home/vagrant/.ssh/authorized_keys
 	cat > ~vagrant/.ssh/config << EOF
 TCPKeepAlive yes
@@ -79,8 +79,8 @@ EOF
 	chown vagrant.vagrant -R ~vagrant/.ssh
 
 	# Zeroize the disk to make the compression better
-	dd if=/dev/zero of=/EMPTY bs=1M
-	rm -f /EMPTY
+	#dd if=/dev/zero of=/EMPTY bs=1M
+	#rm -f /EMPTY
   SHELL
 
 #  config.vm.provision "shell", reboot: true

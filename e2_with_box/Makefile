@@ -1,4 +1,4 @@
-BOXNAME=ebox
+include ../common/Makefile.inc
 
 help:
 	@echo "Beware, you should have the $(BOXNAME) prepared in advance"

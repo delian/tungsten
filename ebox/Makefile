@@ -8,7 +8,7 @@ package:
 	@echo "Stopping the image"
 	vagrant halt
 	@echo "fix the permissions..."
-	 sudo chmod a+r /var/lib/libvirt/images/ebox_controller.img
+	sudo chmod a+r /var/lib/libvirt/images/ebox_base.img || echo "Monitor for permission errors"
 	@echo "Building the box"
 	vagrant package --output $(BOXNAME).box
 	@echo "Adding the box to Vagrant"
@@ -23,6 +23,6 @@ destroy:
 
 clean:
 	vagrant destroy --force
-	rm -rf .vagrant _tmp_package
 	vagrant box remove $(BOXNAME) --force || echo "Box is already removed"
+	rm -rf .vagrant _tmp_package
 	rm -rf $(BOXNAME).box

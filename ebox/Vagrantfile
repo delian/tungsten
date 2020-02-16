@@ -30,7 +30,7 @@ Vagrant.configure("2") do |config|
 	systemctl restart ntpd
 	sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
 	systemctl restart sshd
-	usermod root -p '\$1\$lYJ/EaMg\$KokgHCs2eqrEZ7Nima.Vs1'
+	#usermod root -p '\$1\$lYJ/EaMg\$KokgHCs2eqrEZ7Nima.Vs1'
 
 	mkdir -p /home/vagrant/.ssh
 	chmod 0700 /home/vagrant/.ssh

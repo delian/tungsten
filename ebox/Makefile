@@ -7,6 +7,8 @@ package:
 	vagrant up
 	@echo "Stopping the image"
 	vagrant halt
+	@echo "fix the permissions..."
+	 sudo chmod a+r /var/lib/libvirt/images/ebox_controller.img
 	@echo "Building the box"
 	vagrant package --output $(BOXNAME).box
 	@echo "Adding the box to Vagrant"

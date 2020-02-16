@@ -1,6 +1,8 @@
 BOXNAME=ebox
 
 package:
+	@echo "Removing old boxes"
+	vagrant box remove $(BOXNAME) --force || echo "The box is already removed"
 	@echo "Building base-box named $(BOXNAME)"
 	vagrant up
 	@echo "Stopping the image"
@@ -12,5 +14,14 @@ package:
 	@echo "Cleaning up"
 	vagrant destroy --force
 
+destroy:
+	vagrant destroy --force
+	vagrant box remove $(BOXNAME) --force || echo "Box is already removed"
+	rm -rf $(BOXNAME).box
+
 clean:
+	vagrant destroy --force
 	rm -rf .vagrant _tmp_package
+	vagrant box remove $(BOXNAME) --force || echo "Box is already removed"
+	rm -rf $(BOXNAME).box
+	

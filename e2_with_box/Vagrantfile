@@ -115,7 +115,7 @@ EOF
 	mv contrail-ansible-deployer/config/instances.yaml contrail-ansible-deployer/config/instances.yaml.org
 	echo "Vagrant"
 	ls -ald /vagrant/instances.yaml
-	[ -f /vagrant/instances.yaml ] && mv -v /vagrant/instances.yaml /home/vagrant/contrail-ansible-deployer/config/instances.yaml
+	[ -f /vagrant/instances.yaml ] && cp -v /vagrant/instances.yaml /home/vagrant/contrail-ansible-deployer/config/instances.yaml
 	chown vagrant.vagrant contrail-ansible-deployer/config/instances.yaml
 
 #	cd contrail-ansible-deployer

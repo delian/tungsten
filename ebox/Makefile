@@ -1,4 +1,4 @@
-BOXNAME=ebox
+include ../common/Makefile.inc
 
 package:
 	@echo "Removing old boxes"
@@ -26,4 +26,3 @@ clean:
 	rm -rf .vagrant _tmp_package
 	vagrant box remove $(BOXNAME) --force || echo "Box is already removed"
 	rm -rf $(BOXNAME).box
-	

@@ -1,0 +1,131 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "tungstenbase"
+
+  config.vm.define :controller do |config|
+	config.vm.hostname = "tgf-controller"
+	config.vm.network "private_network", ip: "192.168.133.10"
+	config.vm.network "forwarded_port", guest_ip: "192.168.133.10", guest: 8143, host_ip: "0.0.0.0", host: 8143, protocol: "tcp"
+	config.vm.provider :libvirt do |lv|
+      		lv.cpus = 4
+      		lv.memory = 24000
+  	end
+	#config.vm.provision "file", source: "instances.yaml", destination: "/home/vagrant/instances.yaml"
+  end
+
+  config.vm.define :gateway do |config|
+	config.vm.hostname = "tgf-gateway"
+	config.vm.network "private_network", ip: "192.168.133.11"
+	config.vm.provider :libvirt do |lv|
+		lv.cpus = 2
+      		lv.memory = 2100
+  	end
+  end
+
+  config.vm.define :remote do |config|
+	config.vm.hostname = "tgf-remote"
+	config.vm.network "private_network", ip: "192.168.133.12"
+	config.vm.provider :libvirt do |lv|
+		lv.cpus = 2
+      		lv.memory = 2100
+  	end
+  end
+
+  config.vm.provider :libvirt do |lv|
+    lv.uri = 'qemu+unix:///system'
+    lv.nested = true
+    lv.boot 'hd'
+    lv.machine_virtual_size = 100100
+    lv.management_network_name = "vag-mgmt01"
+    lv.management_network_autostart = "true"
+    lv.management_network_address = "192.168.120.0/24"
+    lv.management_network_autostart = "true"
+  end
+
+  config.vm.provision "shell", inline: <<-SHELL
+	su - vagrant -c 'ssh-keygen -N "" -f ~vagrant/.ssh/id_rsa'
+	cat ~vagrant/.ssh/id_rsa.pub >> ~vagrant/.ssh/authorized_keys
+	fdisk /dev/vda << EOF
+p
+d
+n
+p
+1
+
++100G
+p
+a
+p
+w
+EOF
+	partprobe
+	xfs_growfs /dev/vda1
+
+	echo "Clone the git repository"
+	git clone -b R5.0 http://github.com/Juniper/contrail-ansible-deployer
+	chown vagrant.vagrant -R contrail-ansible-deployer
+
+	yum install -y --setopt=obsoletes=0 docker-ce-17.03.1.ce-1.el7.centos docker-ce-selinux-17.03.3.ce-1.el7
+	systemctl enable docker.service
+	systemctl start docker.service
+
+	yum install -y kubelet-1.9.2-0.x86_64
+        yum install -y kubeadm-1.9.2-0.x86_64 kubectl-1.9.2-0.x86_64	
+	sed -i 's/cgroup-driver=systemd/cgroup-driver=cgroupfs/g' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+	systemctl daemon-reload
+	systemctl enable kubelet
+	systemctl start kubelet
+
+#	set -v
+#	set -x
+
+#	kubeadm init --pod-network-cidr=10.244.0.0/16
+#	mkdir -p $HOME/.kube
+#	cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+#	chown $(id -u):$(id -g) $HOME/.kube/config
+
+	# Do it for the vagrant user too
+#	cp -a $HOME/.kube ~vagrant/
+#	chown vagrant.vagrant -R ~vagrant/.kube
+#	kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+##	kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/k8s-manifests/kube-flannel-legacy.yml
+#        master_cluster_IP=$(kubectl cluster-info | grep master | cut -f2 -d ":" | cut -d '/' -f3)
+
+	# Install
+#	echo "Master Cluster IP is $master_cluster_IP"
+#	K8S_MASTER_IP="\$master_cluster_IP"
+#	CONTRAIL_REPO="docker.io\\\/opencontrailnightly"
+#	CONTRAIL_RELEASE="latest"
+#	mkdir -pm 777 /var/lib/contrail/kafka-logs
+#	curl https://raw.githubusercontent.com/Juniper/contrail-kubernetes-docs/master/install/kubernetes/templates/contrail-single-step-cni-install-centos.yaml > contrail-single-step-cni-install-centos.yaml
+#        sed "s/{{ K8S_MASTER_IP }}/\$K8S_MASTER_IP/g; s/{{ CONTRAIL_REPO }}/\$CONTRAIL_REPO/g; s/{{ CONTRAIL_RELEASE }}/\$CONTRAIL_RELEASE/g" contrail-single-step-cni-install-centos.yaml | kubectl apply -f -
+
+	# Firewall Daemon is not installed anyway, so we don't need this
+	#firewall-cmd --permanent --add-port=6443/tcp
+	#firewall-cmd --permanent --add-port=2379-2380/tcp
+	#firewall-cmd --permanent --add-port=10250/tcp
+	#firewall-cmd --permanent --add-port=10251/tcp
+	#firewall-cmd --permanent --add-port=10252/tcp
+	#firewall-cmd --permanent --add-port=10255/tcp
+	#firewall-cmd –-reload
+
+# Lets generate base instances.yaml file
+	mv contrail-ansible-deployer/config/instances.yaml contrail-ansible-deployer/config/instances.yaml.org
+	echo "Vagrant"
+	ls -ald /vagrant/instances.yaml
+	[ -f /vagrant/instances.yaml ] && cp -v /vagrant/instances.yaml /home/vagrant/contrail-ansible-deployer/config/instances.yaml
+	chown vagrant.vagrant contrail-ansible-deployer/config/instances.yaml
+
+#	cd contrail-ansible-deployer
+#       ansible-playbook -e orchestrator=kubernetes -i inventory/ contrail-ansible-deployer/playbooks/configure_instances.yml
+# 	ansible-playbook -e orchestrator=kubernetes -i inventory/ contrail-ansible-deployer/playbooks/install_k8s.yml
+# 	ansible-playbook -e orchestrator=kubernetes -i inventory/ contrail-ansible-deployer/playbooks/install_contrail.yml
+
+
+  SHELL
+
+#  config.vm.provision "shell", reboot: true
+
+end

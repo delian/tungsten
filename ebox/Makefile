@@ -12,7 +12,7 @@ package:
 	@echo "Building the box"
 	vagrant package --output $(BOXNAME).box
 	@echo "Adding the box to Vagrant"
-	vagrant box add $(BOXNAME) $(BOXNAME).box
+	vagrant box add $(BOXNAME) $(BOXNAME).box && rm -rf $(BOXNAME).box
 	@echo "Cleaning up"
 	vagrant destroy --force
 
